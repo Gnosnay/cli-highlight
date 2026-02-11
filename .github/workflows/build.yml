@@ -21,7 +21,7 @@ jobs:
       - run: npm run prettier
       - run: npm run eslint
       - run: npm run build
-      - run: npm test
+      - run: npm run test
         env:
           OUTPUT_CODE_SAMPLES: true
       - run: bash <(curl -s https://codecov.io/bash)
