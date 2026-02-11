@@ -1,6 +1,9 @@
 /* eslint-disable no-sync */
-import * as fs from 'fs'
-import { highlight, listLanguages, supportsLanguage } from '..'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { highlight, listLanguages, supportsLanguage } from '../index.js'
 
 function test(language: string, code: string): void {
     it(`should color ${language} correctly`, () => {
@@ -15,10 +18,12 @@ function test(language: string, code: string): void {
 }
 
 describe('highlight()', () => {
-    const fixtures = fs.readdirSync(`${__dirname}/__fixtures__`)
+    const dirname = path.dirname(fileURLToPath(import.meta.url))
+    const fixtureDir = path.join(dirname, '__fixtures__')
+    const fixtures = fs.readdirSync(fixtureDir)
 
     for (const fixture of fixtures) {
-        const fixturePath = `${__dirname}/__fixtures__/${fixture}`
+        const fixturePath = path.join(fixtureDir, fixture)
 
         if (fs.statSync(fixturePath).isFile()) {
             const [language] = fixture.split('.')

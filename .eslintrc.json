@@ -2,5 +2,10 @@
   "extends": ["@sourcegraph/eslint-config"],
   "parserOptions": {
     "project": "tsconfig.json"
+  },
+  "rules": {
+    "@typescript-eslint/no-unsafe-enum-comparison": "off",
+    "import/no-default-export": "off",
+    "unicorn/prefer-top-level-await": "off"
   }
 }

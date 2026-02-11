@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5", "es2015.promise", "dom"],
-    "module": "commonjs",
+    "target": "es2020",
+    "lib": ["es2020", "dom"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "outDir": "dist",
     "declaration": true,
     "sourceMap": true,
@@ -17,10 +18,8 @@
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
     "noUnusedLocals": true,
-    "baseUrl": ".",
-    "paths": {
-      "parse5": ["./node_modules/parse5/lib/index.d.ts"],
-    },
+    "isolatedModules": true,
+    "baseUrl": "."
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*"]
 }

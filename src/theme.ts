@@ -1,4 +1,4 @@
-import chalk, { Chalk } from 'chalk'
+import chalk, { type ChalkInstance } from 'chalk'
 
 /**
  * A generic interface that holds all available language tokens.
@@ -532,7 +532,7 @@ export function fromJson(json: JsonTheme): Theme {
 export function toJson(theme: Theme): JsonTheme {
     const jsonTheme: any = {}
     for (const key of Object.keys(jsonTheme)) {
-        const style: Chalk & { _styles: string[] } = (jsonTheme as any)[key]
+        const style: ChalkInstance & { _styles: string[] } = jsonTheme[key]
         jsonTheme[key] = style._styles
     }
     return jsonTheme

@@ -1,11 +1,15 @@
-import * as fs from 'mz/fs'
-import * as path from 'path'
-import * as tty from 'tty'
-import yargs from 'yargs'
-import { highlight, HighlightOptions, supportsLanguage } from '.'
-import { parse } from './theme'
+import { readFile } from 'node:fs/promises'
+import * as path from 'node:path'
+import * as tty from 'node:tty'
 
-yargs
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+
+import { parse } from './theme.js'
+
+import { highlight, type HighlightOptions, supportsLanguage } from './index.js'
+
+const parser = yargs(hideBin(process.argv))
     .option('theme', {
         alias: 't',
         nargs: 1,
@@ -26,14 +30,16 @@ yargs
     .alias('help', 'h')
     .alias('version', 'v')
 
-interface Arguments extends yargs.Arguments {
+interface Arguments {
+    _: (string | number)[]
     theme?: string
     language?: string
 }
 
-const argv: Arguments = yargs.argv
+const argv = parser.parseSync() as Arguments
 
-const file = argv._[0]
+const fileArg = argv._[0]
+const file = typeof fileArg === 'string' ? fileArg : undefined
 
 let codePromise: Promise<string>
 if (!file && !(process.stdin as tty.ReadStream).isTTY) {
@@ -57,13 +63,13 @@ if (!file && !(process.stdin as tty.ReadStream).isTTY) {
     })
 } else if (file) {
     // Read file
-    codePromise = fs.readFile(file, 'utf-8')
+    codePromise = readFile(file, 'utf-8')
 } else {
-    yargs.showHelp()
+    parser.showHelp()
     process.exit(1)
 }
 
-Promise.all<string, string | undefined>([codePromise, argv.theme ? fs.readFile(argv.theme, 'utf8') : undefined])
+Promise.all([codePromise, argv.theme ? readFile(argv.theme, 'utf8') : undefined])
     .then(([code, theme]) => {
         const options: HighlightOptions = {
             ignoreIllegals: true,

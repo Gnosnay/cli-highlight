@@ -1,41 +1,39 @@
-import * as hljs from 'highlight.js'
-import * as parse5 from 'parse5'
-import htmlparser2Adapter from 'parse5-htmlparser2-tree-adapter'
-// eslint-disable-next-line no-duplicate-imports
-import * as HtmlParser2 from 'parse5-htmlparser2-tree-adapter'
-import { DEFAULT_THEME, plain, Theme } from './theme'
+import type { AnyNode, DataNode } from 'domhandler'
+import hljs from 'highlight.js'
+import { parseFragment } from 'parse5'
+import { adapter, type Htmlparser2TreeAdapterMap } from 'parse5-htmlparser2-tree-adapter'
 
-function colorizeNode(node: HtmlParser2.Node, theme: Theme = {}, context?: string): string {
+import { DEFAULT_THEME, plain, Theme } from './theme.js'
+
+function colorizeNode(node: AnyNode, theme: Theme = {}, context?: string): string {
     switch (node.type) {
         case 'text': {
-            const text = (node as HtmlParser2.TextNode).data
+            const text = (node as DataNode).data
             if (context === undefined) {
                 return (theme.default || DEFAULT_THEME.default || plain)(text)
             }
             return text
         }
         case 'tag': {
-            const hljsClass = /hljs-(\w+)/.exec((node as HtmlParser2.Element).attribs.class)
+            const hljsClass = /hljs-(\w+)/.exec(node.attribs.class || '')
             if (hljsClass) {
                 const token = hljsClass[1]
-                const nodeData = (node as HtmlParser2.Element).childNodes
-                    .map(node => colorizeNode(node, theme, token))
-                    .join('')
+                const nodeData = node.childNodes.map(node => colorizeNode(node, theme, token)).join('')
                 return ((theme as any)[token] || (DEFAULT_THEME as any)[token] || plain)(nodeData)
             }
 
             // Return the data itself when the class name isn't prefixed with a highlight.js token prefix.
             // This is common in instances of sublanguages (JSX, Markdown Code Blocks, etc.)
-            return (node as HtmlParser2.Element).childNodes.map(node => colorizeNode(node, theme)).join('')
+            return node.childNodes.map(node => colorizeNode(node, theme)).join('')
         }
     }
     throw new Error('Invalid node type ' + node.type)
 }
 
 function colorize(code: string, theme: Theme = {}): string {
-    const fragment = parse5.parseFragment(code, {
-        treeAdapter: htmlparser2Adapter,
-    }) as HtmlParser2.DocumentFragment
+    const fragment = parseFragment<Htmlparser2TreeAdapterMap>(code, {
+        treeAdapter: adapter,
+    })
     return fragment.childNodes.map(node => colorizeNode(node, theme)).join('')
 }
 
@@ -79,7 +77,6 @@ export interface HighlightOptions {
  *     console.log(highlight(json));
  * });
  * ```
- *
  * @param code The code to highlight
  * @param options Optional options
  */
@@ -109,4 +106,4 @@ export function supportsLanguage(name: string): boolean {
 }
 
 export default highlight
-export * from './theme'
+export * from './theme.js'
